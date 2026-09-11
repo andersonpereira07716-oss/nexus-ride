@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { InteractiveMap } from './components/InteractiveMap';
-import { Shield, Search, ChevronRight, MapPin, X, Car, Clock, CheckCircle2, User, Navigation, DollarSign, Bell, Check, Sparkles, Timer } from 'lucide-react';
+import { Search, ChevronRight, MapPin, X, Car, Clock, CheckCircle2, User, Navigation, DollarSign, Bell, Check, Sparkles, Timer } from 'lucide-react';
 
 interface SearchResult {
   place_id: number;
@@ -88,7 +88,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setTimeout>;
     if (userRole === 'driver' && isDriverOnline && !incomingRide && !driverActiveRide) {
       timer = setTimeout(() => {
         setIncomingRide({
