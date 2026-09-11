@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* Dark Mode Futurista para os blocos do Leaflet */
+.leaflet-tile-pane {
+  filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3);
+}
+
+.leaflet-container {
+  background: #090d16 !important;
+}
+

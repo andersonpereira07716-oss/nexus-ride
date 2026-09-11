@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "e0c6b27c-60a1-4d72-9fc4-d982ea6f0847"
+      }
+    },
+    "android": {
+      "package": "com.anderson_ps1.nexusride"
+    }
+  }
+}

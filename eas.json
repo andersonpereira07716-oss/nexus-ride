@@ -1,0 +1,12 @@
+{
+  "cli": {
+    "requireCommit": false
+  },
+  "build": {
+    "preview": {
+      "android": {
+        "buildType": "apk"
+      }
+    }
+  }
+}
