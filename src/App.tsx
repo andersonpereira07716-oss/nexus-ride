@@ -268,6 +268,12 @@ export default function App() {
         </div>
       )}
 
+      {locationError && (
+        <div className="absolute top-16 inset-x-4 z-50 bg-amber-600/90 text-white text-xs font-semibold p-2.5 rounded-xl text-center shadow-lg">
+          {locationError}
+        </div>
+      )}
+
       {/* HEADER TOP BAR */}
       <header className="relative z-10 p-3 flex justify-between items-center backdrop-blur-md bg-slate-900/80 border-b border-slate-800">
         <div className="flex items-center gap-3">
