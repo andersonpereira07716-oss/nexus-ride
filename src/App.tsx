@@ -91,8 +91,15 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const safetyTimeout = setTimeout(() => setAuthLoading(false), 4000);
+
     supabase.auth.getSession().then(({ data: { session } }) => {
+      clearTimeout(safetyTimeout);
       setSession(session);
+      setAuthLoading(false);
+    }).catch((err) => {
+      clearTimeout(safetyTimeout);
+      console.error('Erro ao verificar sessão:', err);
       setAuthLoading(false);
     });
 
