@@ -51,7 +51,8 @@ export default function App() {
 
   const [destination, setDestination] = useState('');
   const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
-  const [originCoords, setOriginCoords] = useState<[number, number] | null>(MATERNIDADE_COORDS);
+  const [originCoords, setOriginCoords] = useState<[number, number] | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const [selectedCoords, setSelectedCoords] = useState<[number, number] | null>(null);
   const [activeRoute, setActiveRoute] = useState<[number, number][]>([]);
   const [selectedName, setSelectedName] = useState('');
@@ -59,6 +60,29 @@ export default function App() {
   
   const [rideStatus, setRideStatus] = useState<'idle' | 'selecting' | 'searching' | 'accepted'>('idle');
   const [estimatedPrice, setEstimatedPrice] = useState<number>(0);
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setLocationError('Geolocalização não suportada neste navegador.');
+      setOriginCoords(MATERNIDADE_COORDS);
+      return;
+    }
+
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        setOriginCoords([position.coords.latitude, position.coords.longitude]);
+        setLocationError(null);
+      },
+      (error) => {
+        console.error('Erro ao obter localização:', error);
+        setLocationError('Não foi possível obter sua localização. Ative o GPS e permita o acesso.');
+        setOriginCoords(MATERNIDADE_COORDS);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+    );
+
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, []);
 
   const playNotificationSound = () => {
     try {
