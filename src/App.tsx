@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { InteractiveMap } from './components/InteractiveMap';
+import { Auth } from './components/Auth';
+import { supabase } from './lib/supabase';
+import type { Session } from '@supabase/supabase-js';
 import { Search, ChevronRight, MapPin, X, Car, Clock, CheckCircle2, User, Navigation, DollarSign, Bell, Check, Sparkles, Timer } from 'lucide-react';
 
 interface SearchResult {
@@ -39,6 +42,9 @@ const SAMPLE_ROUTE_PATOS: [number, number][] = [
 ];
 
 export default function App() {
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<{ full_name: string; avatar_url: string | null } | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [userRole, setUserRole] = useState<'passenger' | 'driver'>('passenger');
   const [isDriverOnline, setIsDriverOnline] = useState(false);
   const [incomingRide, setIncomingRide] = useState<any | null>(null);
@@ -83,6 +89,38 @@ export default function App() {
 
     return () => navigator.geolocation.clearWatch(watchId);
   }, []);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!session?.user) {
+      setProfile(null);
+      return;
+    }
+    supabase
+      .from('profiles')
+      .select('full_name, avatar_url')
+      .eq('id', session.user.id)
+      .single()
+      .then(({ data }) => {
+        if (data) setProfile(data);
+      });
+  }, [session]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+  };
 
   const playNotificationSound = () => {
     try {
@@ -248,6 +286,18 @@ export default function App() {
 
   const timerProgress = (timeLeft / INITIAL_TIMER_SECONDS) * 100;
 
+  if (authLoading) {
+    return (
+      <div className="h-screen w-full bg-slate-950 flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <Auth />;
+  }
+
   return (
     <div className="relative h-screen w-full bg-slate-950 text-white overflow-hidden flex flex-col">
       {/* TOAST DE SUCESSO */}
@@ -288,7 +338,7 @@ export default function App() {
             <h1 className="text-[10px] uppercase font-semibold text-cyan-400 tracking-wider">
               {userRole === 'passenger' ? 'Passageiro' : 'Motorista Parceiro'}
             </h1>
-            <p className="text-sm font-bold tracking-wide text-slate-100">Anderson Silva 👋</p>
+            <p className="text-sm font-bold tracking-wide text-slate-100">{profile?.full_name || session.user.email} 👋</p>
           </div>
         </div>
 
@@ -307,6 +357,12 @@ export default function App() {
           >
             {userRole === 'passenger' ? <Car className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
             <span>{userRole === 'passenger' ? 'Modo Motorista' : 'Modo Passageiro'}</span>
+          </button>
+          <button
+            onClick={handleSignOut}
+            className="px-2.5 py-1.5 rounded-xl border border-slate-700 bg-slate-800 text-xs font-bold text-slate-400"
+          >
+            Sair
           </button>
         </div>
       </header>
