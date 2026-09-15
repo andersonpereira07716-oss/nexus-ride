@@ -144,7 +144,7 @@ export default function App() {
         async (payload) => {
           const ride = payload.new as any;
           const { data: passengerProfile } = await supabase
-            .from('profiles')
+            .from('public_profiles')
             .select('full_name')
             .eq('id', ride.passenger_id)
             .single();
