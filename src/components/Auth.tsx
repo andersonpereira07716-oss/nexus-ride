@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Car, Lock, Mail, User, AlertCircle } from 'lucide-react';
+import { Lock, Mail, User, AlertCircle } from 'lucide-react';
 
 export function Auth() {
   const [isLogin, setIsLogin] = useState(false);
@@ -46,9 +46,7 @@ export function Auth() {
     <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 text-white">
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 max-w-md w-full shadow-2xl">
         <div className="flex flex-col items-center mb-6">
-          <div className="w-14 h-14 bg-blue-600/20 rounded-2xl flex items-center justify-center mb-3 border border-blue-500/30">
-            <Car className="w-7 h-7 text-blue-400" />
-          </div>
+          <img src="/logo.png" alt="Nexus Ride" className="w-16 h-16 rounded-2xl mb-3 shadow-lg shadow-blue-500/20" />
           <h1 className="text-2xl font-bold tracking-wide">Nexus Ride</h1>
           <p className="text-slate-400 text-sm mt-1">
             {isLogin ? 'Entre na sua conta' : 'Crie sua conta'}

@@ -371,8 +371,9 @@ export default function App() {
 
   if (authLoading) {
     return (
-      <div className="h-screen w-full bg-slate-950 flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin"></div>
+      <div className="h-screen w-full bg-slate-950 flex flex-col items-center justify-center gap-4">
+        <img src="/logo.png" alt="Nexus Ride" className="w-20 h-20 rounded-2xl shadow-lg shadow-cyan-500/20" />
+        <div className="w-8 h-8 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin"></div>
       </div>
     );
   }
