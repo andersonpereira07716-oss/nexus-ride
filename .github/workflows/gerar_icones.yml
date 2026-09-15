@@ -10,6 +10,9 @@ jobs:
       - name: Checkout do codigo
         uses: actions/checkout@v4
 
+      - name: Listar arquivos para debug
+        run: ls -la
+
       - name: Configurar Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -17,9 +20,13 @@ jobs:
 
       - name: Instalar dependencias
         run: flutter pub get
+        # Se o seu projeto estiver dentro de uma pasta (ex: app), descomente a linha abaixo e troque 'app' pelo nome da pasta:
+        # working-directory: ./app
 
       - name: Gerar Icones
         run: flutter pub run flutter_launcher_icons:main
+        # Se o seu projeto estiver dentro de uma pasta, descomente a linha abaixo:
+        # working-directory: ./app
 
       - name: Commit e Push dos icones gerados
         run: |
