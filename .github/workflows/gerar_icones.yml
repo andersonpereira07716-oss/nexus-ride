@@ -10,22 +10,35 @@ jobs:
       - name: Checkout do codigo
         uses: actions/checkout@v4
 
-      - name: Listar arquivos para debug
-        run: ls -la
-
       - name: Configurar Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
 
+      - name: Encontrar a pasta do projeto automaticamente
+        id: find_project
+        run: |
+          echo "Procurando pelo arquivo pubspec.yaml..."
+          # Procura em qualquer lugar, ignorando pastas de build
+          DIR=$(find . -name "pubspec.yaml" -not -path "*/build/*" -exec dirname {} \; | head -n 1)
+          
+          if [ -z "$DIR" ]; then
+            echo "::error::Arquivo pubspec.yaml NAO ENCONTRADO no repositorio!"
+            echo "Verifique se os arquivos do Flutter foram enviados corretamente."
+            ls -la
+            exit 1
+          else
+            echo "Projeto Flutter encontrado na pasta: $DIR"
+            echo "WORKDIR=$DIR" >> $GITHUB_ENV
+          fi
+
       - name: Instalar dependencias
         run: flutter pub get
-        # Se o seu projeto estiver dentro de uma pasta, remova o # da linha abaixo e coloque o nome da pasta
-        # working-directory: ./nome_da_pasta_aqui
+        working-directory: ${{ env.WORKDIR }}
 
       - name: Gerar Icones
         run: flutter pub run flutter_launcher_icons:main
-        # working-directory: ./nome_da_pasta_aqui
+        working-directory: ${{ env.WORKDIR }}
 
       - name: Commit e Push dos icones gerados
         run: |
