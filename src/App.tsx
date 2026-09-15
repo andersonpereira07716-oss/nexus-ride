@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { InteractiveMap } from './components/InteractiveMap';
 import { Auth } from './components/Auth';
+import { RideHistory } from './components/RideHistory';
+import { History } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 import { Search, ChevronRight, MapPin, X, Car, Clock, User, Navigation, Bell, Sparkles, Timer } from 'lucide-react';
@@ -45,6 +47,7 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<{ full_name: string; avatar_url: string | null } | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [showHistory, setShowHistory] = useState(false);
 
   const [userRole, setUserRole] = useState<'passenger' | 'driver'>('passenger');
   const [isDriverOnline, setIsDriverOnline] = useState(false);
@@ -391,6 +394,7 @@ export default function App() {
 
   return (
     <div className="relative h-screen w-full bg-slate-950 text-white overflow-hidden flex flex-col">
+      {showHistory && session && <RideHistory session={session} onClose={() => setShowHistory(false)} />}
       {showSuccessToast && (
         <div className="absolute top-16 inset-x-4 z-50 bg-gradient-to-r from-emerald-600 to-teal-600 p-3.5 rounded-2xl shadow-2xl flex items-center justify-between border border-emerald-400/50">
           <div className="flex items-center gap-3">
@@ -446,6 +450,12 @@ export default function App() {
           >
             {userRole === 'passenger' ? <Car className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
             <span>{userRole === 'passenger' ? 'Motorista' : 'Passageiro'}</span>
+          </button>
+          <button
+            onClick={() => setShowHistory(true)}
+            className="p-2 rounded-xl border border-slate-700 bg-slate-800 text-slate-400"
+          >
+            <History className="w-4 h-4" />
           </button>
           <button
             onClick={handleSignOut}
