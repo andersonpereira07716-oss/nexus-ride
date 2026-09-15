@@ -20,13 +20,12 @@ jobs:
 
       - name: Instalar dependencias
         run: flutter pub get
-        # Se o seu projeto estiver dentro de uma pasta (ex: app), descomente a linha abaixo e troque 'app' pelo nome da pasta:
-        # working-directory: ./app
+        # Se o seu projeto estiver dentro de uma pasta, remova o # da linha abaixo e coloque o nome da pasta
+        # working-directory: ./nome_da_pasta_aqui
 
       - name: Gerar Icones
         run: flutter pub run flutter_launcher_icons:main
-        # Se o seu projeto estiver dentro de uma pasta, descomente a linha abaixo:
-        # working-directory: ./app
+        # working-directory: ./nome_da_pasta_aqui
 
       - name: Commit e Push dos icones gerados
         run: |
