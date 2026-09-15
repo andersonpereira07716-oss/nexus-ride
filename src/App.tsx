@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { InteractiveMap } from './components/InteractiveMap';
 import { Auth } from './components/Auth';
 import { RideHistory } from './components/RideHistory';
+import { RatingModal } from './components/RatingModal';
 import { History } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import type { Session } from '@supabase/supabase-js';
@@ -48,6 +49,7 @@ export default function App() {
   const [profile, setProfile] = useState<{ full_name: string; avatar_url: string | null } | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
+  const [ratingTarget, setRatingTarget] = useState<{ rideId: string; rateeId: string; rateeName: string } | null>(null);
 
   const [userRole, setUserRole] = useState<'passenger' | 'driver'>('passenger');
   const [isDriverOnline, setIsDriverOnline] = useState(false);
@@ -311,8 +313,19 @@ export default function App() {
     const channel = supabase
       .channel(`ride-${data.id}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'rides', filter: `id=eq.${data.id}` },
-        (payload) => {
-          if ((payload.new as any).status === 'accepted') setRideStatus('accepted');
+        async (payload) => {
+          const updated = payload.new as any;
+          if (updated.status === 'accepted') setRideStatus('accepted');
+          if (updated.status === 'completed' && updated.driver_id) {
+            const { data: driverProfile } = await supabase
+              .from('public_profiles')
+              .select('full_name')
+              .eq('id', updated.driver_id)
+              .single();
+            setRatingTarget({ rideId: updated.id, rateeId: updated.driver_id, rateeName: driverProfile?.full_name || 'motorista' });
+            setRideStatus('idle');
+            setRideId(null);
+          }
         }
       )
       .subscribe();
@@ -369,6 +382,15 @@ export default function App() {
     setDriverEarnings(newEarnings);
     setDriverRidesCount(newRidesCount);
     setLastFareEarned(fareEarned);
+
+    if (rideData?.passenger_id) {
+      const { data: passengerProfile } = await supabase
+        .from('public_profiles')
+        .select('full_name')
+        .eq('id', rideData.passenger_id)
+        .single();
+      setRatingTarget({ rideId, rateeId: rideData.passenger_id, rateeName: passengerProfile?.full_name || 'passageiro' });
+    }
     setRideId(null);
 
     setShowSuccessToast(true);
@@ -395,6 +417,15 @@ export default function App() {
   return (
     <div className="relative h-screen w-full bg-slate-950 text-white overflow-hidden flex flex-col">
       {showHistory && session && <RideHistory session={session} onClose={() => setShowHistory(false)} />}
+      {ratingTarget && session && (
+        <RatingModal
+          rideId={ratingTarget.rideId}
+          raterId={session.user.id}
+          rateeId={ratingTarget.rateeId}
+          rateeName={ratingTarget.rateeName}
+          onClose={() => setRatingTarget(null)}
+        />
+      )}
       {showSuccessToast && (
         <div className="absolute top-16 inset-x-4 z-50 bg-gradient-to-r from-emerald-600 to-teal-600 p-3.5 rounded-2xl shadow-2xl flex items-center justify-between border border-emerald-400/50">
           <div className="flex items-center gap-3">
