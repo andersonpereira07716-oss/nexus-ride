@@ -3,6 +3,7 @@ import { InteractiveMap } from './components/InteractiveMap';
 import { Auth } from './components/Auth';
 import { RideHistory } from './components/RideHistory';
 import { RatingModal } from './components/RatingModal';
+import { EditProfile } from './components/EditProfile';
 import { History } from 'lucide-react';
 import { supabase } from './lib/supabase';
 import type { Session } from '@supabase/supabase-js';
@@ -46,7 +47,8 @@ interface IncomingRide {
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<{ full_name: string; avatar_url: string | null } | null>(null);
+  const [profile, setProfile] = useState<{ full_name: string; avatar_url: string | null; phone: string | null } | null>(null);
+  const [showEditProfile, setShowEditProfile] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
   const [ratingTarget, setRatingTarget] = useState<{ rideId: string; rateeId: string; rateeName: string } | null>(null);
@@ -100,7 +102,7 @@ export default function App() {
     }
     supabase
       .from('profiles')
-      .select('full_name, avatar_url, driver_earnings, driver_rides_count')
+      .select('full_name, avatar_url, phone, driver_earnings, driver_rides_count')
       .eq('id', session.user.id)
       .single()
       .then(({ data }) => {
@@ -417,6 +419,16 @@ export default function App() {
   return (
     <div className="relative h-screen w-full bg-slate-950 text-white overflow-hidden flex flex-col">
       {showHistory && session && <RideHistory session={session} onClose={() => setShowHistory(false)} />}
+      {showEditProfile && session && (
+        <EditProfile
+          session={session}
+          currentName={profile?.full_name || ''}
+          currentPhone={profile?.phone || null}
+          currentAvatar={profile?.avatar_url || null}
+          onClose={() => setShowEditProfile(false)}
+          onSaved={(name, avatarUrl) => setProfile(prev => prev ? { ...prev, full_name: name, avatar_url: avatarUrl } : prev)}
+        />
+      )}
       {ratingTarget && session && (
         <RatingModal
           rideId={ratingTarget.rideId}
@@ -451,11 +463,18 @@ export default function App() {
 
       <header className="relative z-10 p-3 flex justify-between items-center backdrop-blur-md bg-slate-900/80 border-b border-slate-800">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 p-[2px] shrink-0">
-            <div className="w-full h-full rounded-full bg-slate-800 flex items-center justify-center">
-              <User className="w-5 h-5 text-cyan-300" />
+          <button
+            onClick={() => setShowEditProfile(true)}
+            className="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 p-[2px] shrink-0"
+          >
+            <div className="w-full h-full rounded-full bg-slate-800 flex items-center justify-center overflow-hidden">
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="Perfil" className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-5 h-5 text-cyan-300" />
+              )}
             </div>
-          </div>
+          </button>
           <div className="min-w-0">
             <h1 className="text-[10px] uppercase font-semibold text-cyan-400 tracking-wider">
               {userRole === 'passenger' ? 'Passageiro' : 'Motorista Parceiro'}
