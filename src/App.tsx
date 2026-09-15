@@ -261,7 +261,14 @@ export default function App() {
     setActiveRoute(originCoords ? [originCoords, [lat, lon]] : [[lat, lon]]);
   };
 
-  const handleClear = () => {
+  const handleClear = async () => {
+    if (rideId) {
+      await supabase
+        .from('rides')
+        .update({ status: 'cancelled' })
+        .eq('id', rideId)
+        .in('status', ['searching', 'accepted']);
+    }
     setDestination('');
     setSuggestions([]);
     setSelectedCoords(null);
